@@ -3,6 +3,7 @@ from components.episode_buffer import EpisodeBatch
 from modules.mixers.vdn import VDNMixer
 from modules.mixers.qmix import QMixer
 from utils.rl_utils import *
+import numpy as np
 import torch as th
 from torch.optim import RMSprop
 
@@ -101,6 +102,17 @@ class PGLearner_v2:
         # Calculated baseline
         pi = mac_out[:, :-1]  #[bs, t, n_agents, n_actions]
         pi_taken = th.gather(pi, dim=-1, index=actions[:, :-1]).squeeze(-1)    #[bs, t, n_agents]
+        
+        # "pi_taken" is of dimensions [batch size (num of episodes), num of time step per episode, num of agents]
+        h_distance = np.zeros(agent_out_arr.shape[2])
+        count = 0
+        for i in range(pi_taken.shape[0]):
+            for j in range(pi_taken.shape[1]):
+                # Each iteration corresponds to a single time step
+                hellinger_distance += self._hellinger_distance(pi_taken[i,j,:])
+                count+=1
+        hellinger_distance = hellinger_distance/count
+        
         action_mask = mask.repeat(1, 1, self.n_agents)
         pi_taken[action_mask == 0] = 1.0
         log_pi_taken = th.log(pi_taken).reshape(-1)
@@ -125,7 +137,20 @@ class PGLearner_v2:
 
         return advantages, td_error, targets_taken[:, :-1].unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1), log_pi_taken, entropy
 
-    def _hellinger_distance(agent_out):
+    def _hellinger_distance(self, agent_out):
+        agent_out_arr = agent_out.numpy()
+        h_distance = np.zeros(agent_out_arr.shape[0])
+        for count, arr in enumerate(agent_out_arr):
+            new_arr = np.delete(agent_out_arr, count, axis=0)
+            BC = self._calc_h_dist(arr,new_arr)
+            h_distance[count] = np.sqrt(1-BC)
+        return h_distance   
+
+    def _calc_h_dist(self, agent_actions, other_actions):
+        BC = 0
+        for arr in other_actions:
+            BC+= np.sqrt(agent_actions*arr)
+        return BC
         
     def cuda(self):
         self.mac.cuda()
