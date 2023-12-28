@@ -125,7 +125,8 @@ class PGLearner_v2:
 
         return advantages, td_error, targets_taken[:, :-1].unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1), log_pi_taken, entropy
 
-
+    def _hellinger_distance(agent_out):
+        
     def cuda(self):
         self.mac.cuda()
         if self.args.mixer:
