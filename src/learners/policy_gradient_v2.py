@@ -106,7 +106,7 @@ class PGLearner_v2:
         pi_taken = th.gather(pi, dim=-1, index=actions[:, :-1]).squeeze(-1)    #[bs, t, n_agents]
         
         # "pi_taken" is of dimensions [batch size (num of episodes), num of time step per episode, num of agents]
-        h_distance = np.zeros(agent_out_arr.shape[2])
+        h_distance = np.zeros(pi_taken.shape[2])
         count = 0
         for i in range(pi_taken.shape[0]):
             for j in range(pi_taken.shape[1]):
