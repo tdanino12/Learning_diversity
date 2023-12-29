@@ -11,6 +11,8 @@ runner: "parallel"
 buffer_size: 8
 batch_size_run: 8
 batch_size: 8
+wandb_project: "diversity"
+wandb_group: "3s2z"
 
 env_args:
   state_last_action: False # critic adds last action internally
