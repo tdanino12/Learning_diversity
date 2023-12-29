@@ -139,18 +139,19 @@ class PGLearner_v2:
 
     def _hellinger_distance(self, agent_out):
         agent_out_arr = agent_out.numpy()
-        h_distance = np.zeros(agent_out_arr.shape[0])
+        num_agents = agent_out_arr.shape[0]
+        h_distance = np.zeros(num_agents)  
         for count, arr in enumerate(agent_out_arr):
-            new_arr = np.delete(agent_out_arr, count, axis=0)
-            BC = self._calc_h_dist(arr,new_arr)
-            h_distance[count] = np.sqrt(1-BC)
+            new_arr = np.delete(agent_out_arr, count, axis=0)  # delete count_th agent decisions.
+            H = self._calc_h_dist(arr,new_arr)
+            h_distance[count] = H/(num_agents-1)
         return h_distance   
 
     def _calc_h_dist(self, agent_actions, other_actions):
-        BC = 0
+        H = 0
         for arr in other_actions:
-            BC+= np.sqrt(agent_actions*arr)
-        return BC
+            H+= np.sqrt(1-np.sqrt(agent_actions*arr))  # element wise multiplication
+        return H
         
     def cuda(self):
         self.mac.cuda()
