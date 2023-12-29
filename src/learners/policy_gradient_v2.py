@@ -52,14 +52,16 @@ class PGLearner_v2:
         critic_mask = mask.clone()
         mask = mask.repeat(1, 1, self.n_agents).view(-1)
 
-        advantages, td_error, targets_taken, log_pi_taken, entropy = self._calculate_advs(batch, rewards, terminated, actions, avail_actions,
+        advantages, td_error, targets_taken, log_pi_taken, entropy, hellinger_distance = self._calculate_advs(batch, rewards, terminated, actions, avail_actions,
                                                         critic_mask, bs, max_t)
 
         pg_loss = - ((advantages.detach() * log_pi_taken) * mask).sum() / mask.sum()
         vf_loss = ((td_error ** 2) * mask).sum() / mask.sum()
         entropy_loss = (entropy * mask).sum() / mask.sum()
 
-        coma_loss = pg_loss + self.args.vf_coef * vf_loss
+        hellinger_loss = hellinger_distance.mean()
+        
+        coma_loss = pg_loss + self.args.vf_coef * vf_loss + 0.1*hellinger_loss
         if self.args.ent_coef:
             coma_loss -= self.args.ent_coef * entropy_loss
 
@@ -135,7 +137,7 @@ class PGLearner_v2:
         td_error = td_error.unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1)
 
 
-        return advantages, td_error, targets_taken[:, :-1].unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1), log_pi_taken, entropy
+        return advantages, td_error, targets_taken[:, :-1].unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1), log_pi_taken, entropy, hellinger_distance
 
     def _hellinger_distance(self, agent_out):
         agent_out_arr = agent_out.numpy()
