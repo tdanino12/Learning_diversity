@@ -140,7 +140,7 @@ class PGLearner_v2:
         return advantages, td_error, targets_taken[:, :-1].unsqueeze(2).repeat(1, 1, self.n_agents, 1).reshape(-1), log_pi_taken, entropy, hellinger_distance
 
     def _hellinger_distance(self, agent_out):
-        agent_out_arr = agent_out.numpy()
+        agent_out_arr = agent_out.detach().numpy()
         num_agents = agent_out_arr.shape[0]
         h_distance = np.zeros(num_agents)  
         for count, arr in enumerate(agent_out_arr):
