@@ -8,7 +8,7 @@ from types import SimpleNamespace as SN
 from utils.logging import Logger
 from utils.timehelper import time_left, time_str
 from os.path import dirname, abspath
-
+import wandb
 from learners import REGISTRY as le_REGISTRY
 from runners import REGISTRY as r_REGISTRY
 from controllers import REGISTRY as mac_REGISTRY
@@ -84,6 +84,12 @@ def run_sequential(args, logger):
     args.n_actions = env_info["n_actions"]
     args.state_shape = env_info["state_shape"]
 
+    run = wandb.init(
+    project=args.wandb_project,
+    group=args.wandb_group,
+    api_key=os.environ["WANDB_API_KEY"],
+    )
+    
     # Default/Base scheme
     scheme = {
         "state": {"vshape": env_info["state_shape"]},
