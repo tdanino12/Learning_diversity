@@ -87,9 +87,8 @@ def run_sequential(args, logger):
     run = wandb.init(
     project=args.wandb_project,
     group=args.wandb_group,
-    api_key=os.environ["WANDB_API_KEY"],
     )
-    
+    wandb.login(key = os.environ["WANDB_API_KEY"])
     # Default/Base scheme
     scheme = {
         "state": {"vshape": env_info["state_shape"]},
