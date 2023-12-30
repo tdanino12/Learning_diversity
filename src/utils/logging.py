@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging
 import numpy as np
+import wandb
 
 class Logger:
     def __init__(self, console_logger):
@@ -48,6 +49,7 @@ class Logger:
             item = "{:.4f}".format(np.mean([x[1] for x in self.stats[k][-window:]]))
             log_str += "{:<25}{:>8}".format(k + ":", item)
             log_str += "\n" if i % 4 == 0 else "\t"
+            wandb.log({str(k): item})
         self.console_logger.info(log_str)
 
 
