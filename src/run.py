@@ -87,6 +87,7 @@ def run_sequential(args, logger):
     run = wandb.init(
     project=args.wandb_project,
     group=args.wandb_group,
+    name="seed if:{}".format(args.seed),
     )
     wandb.login(key = os.environ["WANDB_API_KEY"])
     # Default/Base scheme
