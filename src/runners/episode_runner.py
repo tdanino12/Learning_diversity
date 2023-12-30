@@ -2,7 +2,6 @@ from envs import REGISTRY as env_REGISTRY
 from functools import partial
 from components.episode_buffer import EpisodeBatch
 import numpy as np
-import wandb
 
 
 class EpisodeRunner:
@@ -118,7 +117,6 @@ class EpisodeRunner:
     def _log(self, returns, stats, prefix):
         self.logger.log_stat(prefix + "return_mean", np.mean(returns), self.t_env)
         self.logger.log_stat(prefix + "return_std", np.std(returns), self.t_env)
-        wandb.log({"reward": np.mean(returns)})
         returns.clear()
 
         for k, v in stats.items():
